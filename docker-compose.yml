@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  pg:
+    image: "postgres:14"
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    networks:
+      - prime
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+      - ./database/pg:/var/lib/postgresql/data
+  # front:
+  #   build:
+  #     context: ./front
+  #     dockerfile: Dockerfile
+  # back:
+  #   build:
+  #     context: ./back
+  #     dockerfile: Dockerfile
+  # search:
+  #   build:
+  #     context: ./search
+  #     dockerfile: Dockerfile
+networks:
+  prime:
+    driver: bridge
+volumes:
+  sail-mysql:
+    driver: local
