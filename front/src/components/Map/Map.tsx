@@ -1,23 +1,21 @@
 import "ol/ol.css";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import OlMap from "ol/Map";
 import View from "ol/View";
+import Point from "ol/geom/Point";
+import { Circle } from "ol/geom";
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer";
 import { OSM, Vector as VectorSource } from "ol/source";
+import { Select } from "ol/interaction";
+import { Fill, Stroke, Style } from "ol/style";
 import { Coordinate } from "ol/coordinate";
-import { Circle } from "ol/geom";
 import Feature from "ol/Feature";
-import { Style } from "ol/style";
-import { toLonLat } from "ol/proj";
+import { toLonLat, fromLonLat } from "ol/proj";
 import { toStringHDMS } from "ol/coordinate";
 import { Overlay } from "ol";
 import css from "./Map.module.scss";
-import { Button, Card } from "antd";
-import {
-  CloseOutlined,
-  EditOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
+import { Card } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 
 export interface IData {
   lat: number;
@@ -25,6 +23,16 @@ export interface IData {
   area_meters: number;
   location_name: string;
 }
+
+const selectedStyle = new Style({
+  fill: new Fill({
+    color: "rgba(255, 255, 255, 0.6)",
+  }),
+  stroke: new Stroke({
+    color: "rgba(255, 255, 255, 0.7)",
+    width: 2,
+  }),
+});
 
 const circleFeature = new Feature({
   geometry: new Circle([12127398.797692968, 4063894.123105166], 500000),
@@ -75,11 +83,28 @@ const Map = () => {
   });
   const [map, setMap] = useState<OlMap | null>(null);
   const [cardData, setCardData] = useState("");
+  const [selected, setSelected] = useState("");
+  const [source, setSource] = useState<VectorSource>();
 
   const handleClose = () => {
     if (!overlay) return;
     overlay.setPosition(undefined);
     return false;
+  };
+
+  const getRandomFeature = () => {
+    const x = Math.random() * 360 - 180;
+    const y = Math.random() * 170 - 85;
+    const geom = new Point(fromLonLat([x, y]));
+    const feature = new Feature(geom);
+    return feature;
+  };
+
+  const loadFeatures = (source: VectorSource) => {
+    const features = new Array(10).fill(0).map(getRandomFeature);
+    features.forEach((feature) => {
+      source?.addFeature(feature);
+    });
   };
 
   // set overlay
@@ -97,16 +122,20 @@ const Map = () => {
       },
     });
 
+    const source = new VectorSource({
+      wrapX: false,
+    });
+    const vector = new VectorLayer({
+      source: source,
+    });
+    setSource(source);
+
     const map = new OlMap({
       layers: [
         new TileLayer({
           source: new OSM(),
         }),
-        new VectorLayer({
-          source: new VectorSource({
-            features: [circleFeature],
-          }),
-        }),
+        vector,
       ],
       overlays: [overlay],
       view: new View({
@@ -114,11 +143,13 @@ const Map = () => {
         zoom: state.zoom,
       }),
     });
+    loadFeatures(source);
 
     setMap(map);
     setOverlay(overlay);
   }, []);
 
+  // ADD LISTENERS
   useEffect(() => {
     if (!map) return;
     map.setTarget("map");
@@ -135,13 +166,35 @@ const Map = () => {
     map.on("singleclick", function (evt) {
       const coordinate = evt.coordinate;
       const hdms = toStringHDMS(toLonLat(coordinate));
-      // console.log(coordinate);
-      console.log(toLonLat(coordinate), state.center);
-      // console.log(hdms);
-      // console.log(overlay);
-
       setCardData("You clicked here: " + hdms);
-      overlay?.setPosition(coordinate);
+      // overlay?.setPosition(coordinate);
+    });
+  }, [map]);
+
+  // SELECT FEATURE
+  useEffect(() => {
+    if (!map) return;
+
+    // a normal select interaction to handle click
+    const select = new Select({
+      style: function (feature) {
+        const color = feature.get("COLOR_BIO") || "#eeeeee";
+        selectedStyle.getFill().setColor(color);
+        return selectedStyle;
+      },
+    });
+    map.addInteraction(select);
+
+    const selectedFeatures = select.getFeatures();
+    selectedFeatures.on(["add", "remove"], function () {
+      const names = selectedFeatures.getArray().map(function (feature) {
+        return feature.get("ECO_NAME");
+      });
+      if (names.length > 0) {
+        setSelected(names.join(", "));
+      } else {
+        setSelected("None");
+      }
     });
   }, [map]);
 
@@ -153,7 +206,10 @@ const Map = () => {
   updateMap();
   return (
     <>
-      <div id="map" style={{ width: "100%", height: "1000px" }}></div>
+      <div
+        id="map"
+        style={{ width: "100%", height: "100%", minHeight: "500px" }}
+      ></div>
       <Card
         className={css.card}
         title="Card title"
@@ -169,6 +225,7 @@ const Map = () => {
       >
         <div className={css.data}>{cardData}</div>
       </Card>
+      <div>{selected}</div>
     </>
   );
 };
