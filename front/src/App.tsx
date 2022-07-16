@@ -1,6 +1,6 @@
 import css from "./App.module.scss";
 import Layout from "components/Layout/Layout";
-import Map from "components/Map/OlMap";
+import Map from "components/Map/Map";
 import { Tabs } from "antd";
 import MyTable from "components/Table/Table";
 const { TabPane } = Tabs;
