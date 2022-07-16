@@ -86,6 +86,7 @@ class Classifier:
         with open("tomsk_models_mlb.pcl", "rb") as f:
             self.hf_mlb = pickle.load(f)
         self.product_pipe = pipeline("text-classification", "product_group")
+        self.tnved_2_pipe = pipeline("text-classification", "tnved_2")
         self.tokenizer_kwargs = {
             "padding": True,
             "truncation": True,
@@ -124,10 +125,18 @@ class Classifier:
         results = results[0]
         return results
 
-    def predict_group(self, text):
+    def predict_group(self, text, task="group"):
         pred = self.product_pipe(text, **self.tokenizer_kwargs)[0]
         pred_class = int(pred["label"].split("_")[-1])
         pred_class_name = self.hf_mlb["Группа продукции_None_mlb"].classes_[
+            pred_class
+        ]
+        return [pred_class_name]
+    
+    def predict_tnved(self, text, task="group"):
+        pred = self.tnved_2_pipe(text, **self.tokenizer_kwargs)[0]
+        pred_class = int(pred["label"].split("_")[-1])
+        pred_class_name = self.hf_mlb["Коды ТН ВЭД ЕАЭС_2_mlb"].classes_[
             pred_class
         ]
         return [pred_class_name]
@@ -147,7 +156,7 @@ def predict_tnved(text: Text) -> Dict:
         Dict: словарик с предсказанием
     """
     try:
-        preds = classifier.predict(text.text, task="tnved")
+        preds = classifier.predict_tnved(text.text)
     except Exception as ex:
         logger.exception(ex)
     return preds
@@ -201,35 +210,18 @@ def predict_all(text: Text) -> Dict:
     try:
         regulation = classifier.predict(text.text, task="regulation")
         product = classifier.predict_group(text.text)
+        tnved = classifier.predict_tnved(text.text)
     except Exception as ex:
         logger.exception(ex)
-    return {"reglament": regulation, "group": product}
-
-
-@app.post("/predict_all")
-def predict_all(text: Text) -> Dict:
-    """Эндпойнт FastApi для выдачи предсказаний по тексту
-
-    Args:
-        text (Text): текст документа
-
-    Returns:
-        Dict: словарик с предсказанием
-    """
-    try:
-        regulation = classifier.predict(text.text, task="regulation")
-        product = classifier.predict_group(text.text)
-    except Exception as ex:
-        logger.exception(ex)
-    return {"reglament": regulation, "group": product}
+    return {"reglament": regulation, "group": product, "tnved1": tnved}
 
 
 @app.post("/search")
-def search(text: Text):
+def search(text: Text, offset: int = 0, limit: int = 100):
     text = text.text
     session = Session()
     query = list(cols_dict.values())[0].ilike(f"%{text}%")
     for col in list(cols_dict.values())[1:]:
         query |= col.ilike(f"%{text}%")
-    rows = session.query(DATA).filter(query).all()
+    rows = session.query(DATA).filter(query).offset(offset).limit(limit).all()
     return rows
