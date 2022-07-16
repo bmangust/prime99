@@ -1,6 +1,7 @@
 export const placeholders = {
+  tnved1: "Код ТН ВЭД",
+  tnved2: "Дополнительный код ТН ВЭД",
   id: "Номер продукции",
-  codesTn: "Код ТН ВЭД",
   reglament: "Регламент",
   group: "Группа товара",
   name: "Наименование",

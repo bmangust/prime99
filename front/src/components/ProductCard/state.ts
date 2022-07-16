@@ -1,88 +1,109 @@
 import { makeAutoObservable, toJS } from "mobx";
+import { createContext } from "react";
+
+const defaultInputs = {
+  tnved1: "",
+  tnved2: "",
+  id: "",
+  reglament: "",
+  group: "",
+  name: "",
+  lab: "",
+  reporter: "",
+  reporterAddress: "",
+  manufacturer: "",
+  manufacturerAdress: "",
+  country: "",
+};
+
+export type IInputs = typeof defaultInputs;
+
+export type Fields = keyof typeof defaultInputs;
 
 class Inputs {
-  id: string;
-  codesTn: string[];
-  reglament: string;
-  group: string;
-  name: string;
-  lab: string;
-  reporter: string;
-  reporterAddress: string;
-  manufacturer: string;
-  manufacturerAdress: string;
-  country: string;
+  inputs: {
+    tnved1: string;
+    tnved2: string;
+    id: string;
+    reglament: string;
+    group: string;
+    name: string;
+    lab: string;
+    reporter: string;
+    reporterAddress: string;
+    manufacturer: string;
+    manufacturerAdress: string;
+    country: string;
+  };
 
-  constructor() {
-    this.id = "";
-    this.codesTn = ["", ""];
-    this.reglament = "";
-    this.group = "";
-    this.name = "";
-    this.lab = "";
-    this.reporter = "";
-    this.reporterAddress = "";
-    this.manufacturer = "";
-    this.manufacturerAdress = "";
-    this.country = "";
+  constructor(defaultInputs: IInputs) {
+    this.inputs = defaultInputs;
+
     makeAutoObservable(this);
   }
 
   update(name: string, value: string) {
     console.log("Input update", name, value);
+    this.inputs[name as Fields] = value;
+  }
 
-    if (name.includes("codesTn")) {
-      const updatedCodes = name.includes("0")
-        ? [value, toJS(this.codesTn[1])]
-        : [toJS(this.codesTn[0]), value];
-      console.log(updatedCodes, this.codesTn);
-      this.codesTn = updatedCodes;
-    } else {
-      //@ts-ignore
-      this[name] = value;
-    }
+  reset() {
+    this.inputs = defaultInputs;
   }
 }
+
+export const inputsState = new Inputs(defaultInputs);
+export const InputsContext = createContext<Inputs>(inputsState);
 
 export interface IOption {
   value: string;
   label?: string;
 }
 
-class Options {
-  id: IOption[];
-  codesTn: IOption[];
-  reglament: IOption[];
-  group: IOption[];
-  name: IOption[];
-  lab: IOption[];
-  reporter: IOption[];
-  reporterAddress: IOption[];
-  manufacturer: IOption[];
-  manufacturerAdress: IOption[];
-  country: IOption[];
+const defaultOptions = {
+  tnved1: [],
+  tnved2: [],
+  id: [],
+  reglament: [],
+  group: [],
+  name: [],
+  lab: [],
+  reporter: [],
+  reporterAddress: [],
+  manufacturer: [],
+  manufacturerAdress: [],
+  country: [],
+};
 
-  constructor() {
-    this.id = [];
-    this.codesTn = [];
-    this.reglament = [];
-    this.group = [];
-    this.name = [];
-    this.lab = [];
-    this.reporter = [];
-    this.reporterAddress = [];
-    this.manufacturer = [];
-    this.manufacturerAdress = [];
-    this.country = [];
+export type IOptions = typeof defaultOptions;
+
+class Options {
+  options: {
+    tnved1: IOption[];
+    tnved2: IOption[];
+    id: IOption[];
+    reglament: IOption[];
+    group: IOption[];
+    name: IOption[];
+    lab: IOption[];
+    reporter: IOption[];
+    reporterAddress: IOption[];
+    manufacturer: IOption[];
+    manufacturerAdress: IOption[];
+    country: IOption[];
+  };
+
+  constructor(defaultOptions: IOptions) {
+    this.options = defaultOptions;
+
     makeAutoObservable(this);
   }
 
   update(name: string, value: IOption[]) {
-    console.log({ name, value });
+    // console.log({ name, value });
     if (!value) return;
-    // @ts-ignore
-    this[name] = value;
+    this.options[name as Fields] = value;
   }
 }
-export const inputsState = new Inputs();
-export const optionsState = new Options();
+export const optionsState = new Options(defaultOptions);
+export const OptionsContext = createContext<Options>(optionsState);

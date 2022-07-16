@@ -1,129 +1,78 @@
-import { Button, Input } from "antd";
+import { Button } from "antd";
 import { placeholders, texts } from "content/string";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useContext, useMemo, useState } from "react";
 import Autocomplete from "./Autocomplete/Autocomplete";
 import css from "./ProductCard.module.scss";
 import { debounce } from "lodash";
+import { Fields, InputsContext, inputsState } from "./state";
+import { observer } from "mobx-react-lite";
 
-interface Props {}
-
-const defaultInputs = {
-  id: null,
-  codesTn: [null, null],
-  reglament: null,
-  group: null,
-  name: null,
-  lab: null,
-  reporter: null,
-  reporterAddress: null,
-  manufacturer: null,
-  manufacturerAdress: null,
-  country: null,
-};
-
-const ProductCard = (props: Props) => {
+// const inputs = inputsState;
+const ProductCard = observer(() => {
+  const inputsState = useContext(InputsContext);
   const [options, setOptions] = useState<{
-    [key in keyof typeof placeholders]: { value: string; label: string }[];
+    [key: string]: { value: string; label: string }[];
   }>({
+    tnved1: [],
+    tnved2: [],
     id: [],
-    codesTn: [],
     reglament: [],
     group: [],
     name: [],
-    lab: [],
-    reporter: [],
-    reporterAddress: [],
-    manufacturer: [],
-    manufacturerAdress: [],
-    country: [],
   });
 
-  // local state for autocomplete
-  const [inputs, setInputs] = useState<{
-    [key in keyof typeof placeholders]: string | string[] | null[] | null;
-  }>(defaultInputs);
-
-  const loadOptions = (name: keyof typeof placeholders, value: string) => {
+  const loadOptions = (name: Fields, value: string) => {
     console.log("loading");
-    const normalizedName = name.includes("codesTn") ? name.slice(0, -1) : name;
-
     setOptions((state) => ({
       ...state,
-      [normalizedName]: [
+      [name]: [
         { value: value, label: value },
         { value: value.repeat(2), label: value.repeat(2) },
-      ],
-      country: [
-        { value: "ru", label: "RU" },
-        { value: "en", label: "EN" },
       ],
     }));
   };
 
   const debouncedLoadOptions = useMemo(() => debounce(loadOptions, 300), []);
 
-  const onInputChange = (name: string, value: string | null) => {
-    if (!value) return;
-    if (!name.includes("codes")) {
-      setInputs((state) => ({ ...state, [name]: value }));
-    } else if (name.includes("codesTn")) {
-      // проверим, какой элемент массива меняется
-      const newCodes = name.includes("0")
-        ? [value, inputs.codesTn?.[1] || ""]
-        : [inputs.codesTn?.[0] || "", value];
-      console.log("onInputChange, newCodes", newCodes);
-      setInputs((state) => ({ ...state, codesTn: newCodes }));
-    }
-    debouncedLoadOptions(name as keyof typeof placeholders, value);
+  const onInputChange = (name: string, value: string) => {
+    // if (!value) return;
+    inputsState.update(name, value);
+    debouncedLoadOptions(name as Fields, value);
+  };
+
+  //@ts-ignore
+  const onChange = (name: string, value: any) => {
+    //   console.log("onChange", name, value);
+    if (value === null) inputsState.update(name, "");
+    else inputsState.update(name, value);
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.table(inputs);
-    setInputs(defaultInputs);
+    console.table(inputsState.inputs);
+    inputsState.reset();
   };
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
       <div className={css.header}>{texts.productCardHeader}</div>
-      {Object.entries(inputs).map(([k, v]) =>
-        k === "codesTn" ? (
-          <div className={css.flex} key={k}>
-            <Autocomplete
-              options={options[k]}
-              className={css.input}
-              name={`${k}0`}
-              value={v?.[0] || null}
-              placeholder={placeholders[k]}
-              onInputChange={onInputChange}
-            />
-            <Autocomplete
-              options={options[k]}
-              className={css.input}
-              name={`${k}1`}
-              value={v?.[0] || null}
-              placeholder={placeholders[k]}
-              onInputChange={onInputChange}
-            />
-          </div>
-        ) : // не будем показывать поле "лаборатория" при вводе товара
-        k === "lab" ? null : (
-          <Autocomplete
-            key={k}
-            options={options[k as keyof typeof placeholders]}
-            className={css.input}
-            name={k}
-            value={v as string}
-            placeholder={placeholders[k as keyof typeof placeholders]}
-            onInputChange={onInputChange}
-          />
-        )
-      )}
+      {Object.entries(inputsState.inputs).map(([k, v]) => (
+        <Autocomplete
+          key={k}
+          options={options[k as Fields]}
+          className={css.input}
+          name={k}
+          value={v as string}
+          placeholder={placeholders[k as Fields]}
+          onInputChange={onInputChange}
+          onChange={onChange}
+        />
+      ))}
       <Button type="primary" className={css.submit}>
         Отправить
       </Button>
     </form>
   );
-};
+});
 
 export default ProductCard;
