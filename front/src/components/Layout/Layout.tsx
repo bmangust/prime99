@@ -1,13 +1,18 @@
 import Header from "components/Header/Header";
+import Sidebar from "components/Sidebar/Sidebar";
+import { FC, ReactNode } from "react";
 import css from "./Layout.module.scss";
 
-const Layout = () => {
+interface Props {
+  children: ReactNode;
+}
+
+const Layout: FC<Props> = ({ children }) => {
   return (
     <div className={css.layout}>
       <Header className={css.header} />
-      <div className={css.sider}>Sider</div>
-      <div className={css.content}>Content</div>
-      <div className={css.footer}>Footer</div>
+      <Sidebar className={css.sider} />
+      <div className={css.content}>{children}</div>
     </div>
   );
 };

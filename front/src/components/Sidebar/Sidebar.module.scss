@@ -1,0 +1,8 @@
+@import "styles/_variables";
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: $gap * 2;
+}

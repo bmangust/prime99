@@ -2,22 +2,23 @@
 
 .layout {
   display: grid;
-  gap: 0.5rem;
+  gap: $gap;
   height: 100vh;
+  width: 100vw;
   grid-template-areas:
     "H"
     "S"
     "C"
     "F";
-  margin: 0.3rem;
 }
 
 .header,
 .content,
 .sider,
 .footer {
-  box-shadow: 4px 0 10px #00000033;
+  box-shadow: 4px 0 10px #00000011;
 }
+
 .header {
   grid-area: H;
 }
@@ -36,12 +37,11 @@
 
 @media (min-width: $tablet_width) {
   .layout {
-    padding: 0 24px;
     grid-template-rows: 100px 1fr 50px;
     grid-template-columns: minmax(400px, 1fr) 3fr;
     grid-template-areas:
       "S H"
       "S C"
-      "S F";
+      "S C";
   }
 }

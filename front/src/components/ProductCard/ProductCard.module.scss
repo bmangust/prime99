@@ -1,0 +1,18 @@
+@import "styles/_variables";
+
+.form {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: $gap * 2;
+}
+
+.flex {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $gap * 2;
+}
+
+.input::placeholder {
+  color: $placeholder;
+}
