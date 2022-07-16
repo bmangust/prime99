@@ -13,4 +13,6 @@ export const placeholders = {
 };
 export const texts = {
   productCardHeader: "Карточка товара",
+  search: "Поиск",
+  searchPlaceholder: "Введите запрос",
 };

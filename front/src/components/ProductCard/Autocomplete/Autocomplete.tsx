@@ -19,7 +19,7 @@ const Autocomplete = observer(
     const state = inputsState[name];
 
     const onChange = (value: any) => {
-      console.log("onChange", name, value);
+      //   console.log("onChange", name, value);
       if (value === null) inputsState.update(name, "");
       else inputsState.update(name, value);
     };
@@ -34,7 +34,7 @@ const Autocomplete = observer(
       }),
     };
 
-    console.log({ name, state, value, options });
+    // console.log({ name, state, value, options });
 
     return (
       <Select

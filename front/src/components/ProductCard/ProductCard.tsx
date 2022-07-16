@@ -1,7 +1,6 @@
-import { Input } from "antd";
+import { Button, Input } from "antd";
 import { placeholders, texts } from "content/string";
-import { makeAutoObservable } from "mobx";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Autocomplete from "./Autocomplete/Autocomplete";
 import css from "./ProductCard.module.scss";
 import { debounce } from "lodash";
@@ -72,7 +71,7 @@ const ProductCard = (props: Props) => {
       const newCodes = name.includes("0")
         ? [value, inputs.codesTn?.[1] || ""]
         : [inputs.codesTn?.[0] || "", value];
-      console.log("working update", newCodes);
+      console.log("onInputChange, newCodes", newCodes);
       setInputs((state) => ({ ...state, codesTn: newCodes }));
     }
     debouncedLoadOptions(name as keyof typeof placeholders, value);
@@ -120,7 +119,9 @@ const ProductCard = (props: Props) => {
           />
         )
       )}
-      <Input type="submit" value="Отправить" />
+      <Button type="primary" className={css.submit}>
+        Отправить
+      </Button>
     </form>
   );
 };
