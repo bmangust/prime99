@@ -1,8 +1,6 @@
 import cn from "classnames";
-import { observer } from "mobx-react-lite";
-import { useContext } from "react";
-import Select, { Options, OptionsOrGroups } from "react-select";
-import { inputsState, IOption } from "../state";
+import { FocusEventHandler, useRef } from "react";
+import Select from "react-select";
 import css from "./Autocomplete.module.scss";
 
 interface Props {
@@ -15,42 +13,36 @@ interface Props {
   onChange: (name: string, value: string | null) => void;
 }
 
-const Autocomplete = observer(
-  ({
-    options,
-    name,
-    placeholder,
-    value,
-    className,
-    onChange,
-    onInputChange,
-  }: Props) => {
-    // const optionsLoaded = options.length > 0 ? css.optionsLoaded : "";
+const Autocomplete = ({
+  options,
+  name,
+  placeholder,
+  value,
+  className,
+  onChange,
+  onInputChange,
+}: Props) => {
+  const customStyles = {
+    control: (provided: any) => ({
+      ...provided,
+      borderColor: options?.length > 0 ? "green" : "gray",
+      borderWidth: options?.length > 0 ? 1.5 : 1,
+    }),
+  };
 
-    const customStyles = {
-      control: (provided: any) => ({
-        ...provided,
-        borderColor: options?.length > 0 ? "green" : "gray",
-        borderWidth: options?.length > 0 ? 1.5 : 1,
-      }),
-    };
-
-    // console.log({ name, state, value, options });
-
-    return (
-      <Select
-        defaultValue={""}
-        isClearable
-        className={cn(css.select, className)}
-        onChange={onChange.bind(null, name)}
-        onInputChange={onInputChange.bind(null, name)}
-        value={value}
-        options={options}
-        placeholder={placeholder}
-        styles={customStyles}
-      />
-    );
-  }
-);
+  return (
+    <Select
+      defaultValue={""}
+      isClearable
+      className={cn(css.select, className)}
+      onChange={(value: string | null) => onChange(name, value)}
+      onInputChange={(value: string) => onInputChange(name, value)}
+      value={value}
+      options={options}
+      placeholder={placeholder}
+      styles={customStyles}
+    />
+  );
+};
 
 export default Autocomplete;

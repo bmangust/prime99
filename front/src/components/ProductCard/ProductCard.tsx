@@ -1,62 +1,100 @@
 import { Button } from "antd";
 import { placeholders, texts } from "content/string";
-import { FormEvent, useContext, useMemo, useState } from "react";
+import { MouseEventHandler, useMemo, useState } from "react";
 import Autocomplete from "./Autocomplete/Autocomplete";
 import css from "./ProductCard.module.scss";
 import { debounce } from "lodash";
-import { Fields, InputsContext, inputsState } from "./state";
 import { observer } from "mobx-react-lite";
 
-// const inputs = inputsState;
-const ProductCard = observer(() => {
-  const inputsState = useContext(InputsContext);
-  const [options, setOptions] = useState<{
-    [key: string]: { value: string; label: string }[];
-  }>({
-    tnved1: [],
-    tnved2: [],
-    id: [],
-    reglament: [],
-    group: [],
-    name: [],
-  });
+export interface IOption {
+  value: string;
+  label?: string;
+}
+const defaultInputs = {
+  tnved1: "",
+  tnved2: "",
+  id: "",
+  reglament: "",
+  group: "",
+  name: "",
+  lab: "",
+  reporter: "",
+  reporterAddress: "",
+  manufacturer: "",
+  manufacturerAdress: "",
+  country: "",
+};
 
-  const loadOptions = (name: Fields, value: string) => {
+const defaultOptions: { [key in Fields]: IOption[] } = {
+  tnved1: [],
+  tnved2: [],
+  id: [],
+  reglament: [],
+  group: [],
+  name: [],
+  lab: [],
+  reporter: [],
+  reporterAddress: [],
+  manufacturer: [],
+  manufacturerAdress: [],
+  country: [],
+};
+
+export type IOptions = typeof defaultOptions;
+export type IInputs = typeof defaultInputs;
+export type Fields = keyof typeof defaultInputs;
+
+const ProductCard = observer(() => {
+  const [inputs, setInputs] = useState(defaultInputs);
+  const [options, setOptions] = useState(defaultOptions);
+
+  const updateInput = (name: string, value: string) => {
+    setInputs((state) => ({ ...state, [name]: value }));
+  };
+  const updateOptions = (name: string, value: IOption[]) => {
+    setOptions((state) => ({ ...state, [name]: value }));
+  };
+
+  const loadOptions = async (name: Fields, value: string) => {
     console.log("loading");
-    setOptions((state) => ({
-      ...state,
-      [name]: [
-        { value: value, label: value },
-        { value: value.repeat(2), label: value.repeat(2) },
-      ],
-    }));
+    if (name === "reglament") {
+      fetch("http://51.250.111.56:5000/regulation_predict", {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify({ text: value }),
+      })
+        .then((res) => res.json)
+        .then((data) => console.log(data));
+    }
+    updateOptions(name, [
+      { value: value, label: value },
+      { value: value.repeat(2), label: value.repeat(2) },
+    ]);
   };
 
   const debouncedLoadOptions = useMemo(() => debounce(loadOptions, 300), []);
 
   const onInputChange = (name: string, value: string) => {
-    // if (!value) return;
-    inputsState.update(name, value);
+    if (!value) return;
+    updateInput(name, value);
     debouncedLoadOptions(name as Fields, value);
   };
 
-  //@ts-ignore
   const onChange = (name: string, value: any) => {
-    //   console.log("onChange", name, value);
-    if (value === null) inputsState.update(name, "");
-    else inputsState.update(name, value);
+    updateInput(name, value);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit: MouseEventHandler<HTMLElement> = (e) => {
     e.preventDefault();
-    console.table(inputsState.inputs);
-    inputsState.reset();
+    console.log(inputs);
+    setInputs(defaultInputs);
+    setOptions(defaultOptions);
   };
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
+    <form className={css.form}>
       <div className={css.header}>{texts.productCardHeader}</div>
-      {Object.entries(inputsState.inputs).map(([k, v]) => (
+      {Object.entries(inputs).map(([k, v]) => (
         <Autocomplete
           key={k}
           options={options[k as Fields]}
@@ -66,9 +104,10 @@ const ProductCard = observer(() => {
           placeholder={placeholders[k as Fields]}
           onInputChange={onInputChange}
           onChange={onChange}
+          // onReset={inputsState.reset}
         />
       ))}
-      <Button type="primary" className={css.submit}>
+      <Button type="primary" className={css.submit} onClick={handleSubmit}>
         Отправить
       </Button>
     </form>

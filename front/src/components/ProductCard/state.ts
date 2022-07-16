@@ -44,10 +44,16 @@ class Inputs {
 
   update(name: string, value: string) {
     console.log("Input update", name, value);
+    if (value === null) return;
+    // this.inputs[name as Fields] = "";
     this.inputs[name as Fields] = value;
   }
 
-  reset() {
+  reset(name: string) {
+    this.inputs[name as Fields] = "";
+  }
+
+  resetForm() {
     this.inputs = defaultInputs;
   }
 }
