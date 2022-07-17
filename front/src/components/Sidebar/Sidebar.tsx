@@ -4,12 +4,6 @@ import { FC } from "react";
 import ProductCard from "components/ProductCard/ProductCard";
 import { Tabs } from "antd";
 import Search from "components/Search/Search";
-import {
-  InputsContext,
-  inputsState,
-  OptionsContext,
-  optionsState,
-} from "components/ProductCard/state";
 const { TabPane } = Tabs;
 
 interface Props {
@@ -23,16 +17,12 @@ const Sidebar: FC<Props> = ({ className }) => {
 
   return (
     <div className={cn(className, css.sidebar)}>
-      <Tabs defaultActiveKey="1" onChange={onChange}>
-        <TabPane tab="Поиск" key="1">
-          <Search />
+      <Tabs defaultActiveKey="create" onChange={onChange}>
+        <TabPane tab="Создать" key="create">
+          <ProductCard />
         </TabPane>
-        <TabPane tab="Создать" key="2">
-          <OptionsContext.Provider value={optionsState}>
-            <InputsContext.Provider value={inputsState}>
-              <ProductCard />
-            </InputsContext.Provider>
-          </OptionsContext.Provider>
+        <TabPane tab="Поиск" key="search">
+          <Search />
         </TabPane>
       </Tabs>
     </div>

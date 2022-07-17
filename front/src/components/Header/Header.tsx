@@ -10,7 +10,7 @@ const Header: FC<Props> = ({ className }) => {
   return (
     <div className={cn(className, css.header)}>
       <div className={css.logo}>Accrehelp</div>
-      <div className={css.profile}>profile</div>
+      <div className={css.profile}>Войти</div>
     </div>
   );
 };

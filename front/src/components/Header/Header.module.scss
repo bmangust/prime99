@@ -3,8 +3,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
+  width: 100%;
 }
 
 .logo {
-  max-width: 200px;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #1890ff;
+}
+
+.profile {
+  color: #1890ff;
 }

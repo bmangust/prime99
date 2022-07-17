@@ -9,12 +9,12 @@ const Content = () => {
   const [active, setActive] = useState("map");
   return (
     <div className={css.content}>
-      <Tabs className={css.tabs} defaultActiveKey="map" activeKey={active}>
-        <TabPane tab="Карта" key="map">
-          <Map />
-        </TabPane>
+      <Tabs className={css.tabs} defaultActiveKey="table">
         <TabPane tab="Таблица" key="table">
           <MyTable />
+        </TabPane>
+        <TabPane tab="Карта" key="map">
+          <Map />
         </TabPane>
       </Tabs>
     </div>

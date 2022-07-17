@@ -1,13 +1,16 @@
 import css from "./App.module.scss";
 import Layout from "components/Layout/Layout";
 import Content from "components/Content/Content";
+import { SearchContext, searchState } from "state/SearchState";
 
 function App() {
   return (
     <div className={css.app}>
-      <Layout>
-        <Content />
-      </Layout>
+      <SearchContext.Provider value={searchState}>
+        <Layout>
+          <Content />
+        </Layout>
+      </SearchContext.Provider>
     </div>
   );
 }

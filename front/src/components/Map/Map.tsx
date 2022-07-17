@@ -143,7 +143,7 @@ const Map = () => {
         zoom: state.zoom,
       }),
     });
-    loadFeatures(source);
+    // loadFeatures(source);
 
     setMap(map);
     setOverlay(overlay);

@@ -16,4 +16,6 @@ export const texts = {
   productCardHeader: "Карточка товара",
   search: "Поиск",
   searchPlaceholder: "Введите запрос",
+  limitPlaceholder: "Максимальное количество записей",
+  offsetPlaceholder: "Сдвиг записей",
 };

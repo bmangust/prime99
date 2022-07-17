@@ -1,10 +1,12 @@
-import { Button } from "antd";
+import { Button, Input } from "antd";
 import { placeholders, texts } from "content/string";
 import { MouseEventHandler, useMemo, useState } from "react";
 import Autocomplete from "./Autocomplete/Autocomplete";
 import css from "./ProductCard.module.scss";
 import { debounce } from "lodash";
 import { observer } from "mobx-react-lite";
+import { loadPredictions } from "fetcher";
+import cn from "classnames";
 
 export interface IOption {
   value: string;
@@ -56,20 +58,21 @@ const ProductCard = observer(() => {
   };
 
   const loadOptions = async (name: Fields, value: string) => {
-    console.log("loading");
-    if (name === "reglament") {
-      fetch("http://51.250.111.56:5000/regulation_predict", {
-        method: "POST",
-        mode: "cors",
-        body: JSON.stringify({ text: value }),
-      })
-        .then((res) => res.json)
-        .then((data) => console.log(data));
+    if (name === "name") {
+      const predict = await loadPredictions(value);
+      if (predict) {
+        console.log(predict);
+        Object.entries(predict).forEach(([k, v]) => {
+          console.log(k, v);
+          const options = (v as string[]).map((item: string) => ({
+            value: item,
+            label: item,
+          }));
+          updateOptions(k, options);
+        });
+      }
     }
-    updateOptions(name, [
-      { value: value, label: value },
-      { value: value.repeat(2), label: value.repeat(2) },
-    ]);
+    updateOptions(name, [...options[name], { value: value, label: value }]);
   };
 
   const debouncedLoadOptions = useMemo(() => debounce(loadOptions, 300), []);
@@ -94,19 +97,32 @@ const ProductCard = observer(() => {
   return (
     <form className={css.form}>
       <div className={css.header}>{texts.productCardHeader}</div>
-      {Object.entries(inputs).map(([k, v]) => (
-        <Autocomplete
-          key={k}
-          options={options[k as Fields]}
-          className={css.input}
-          name={k}
-          value={v as string}
-          placeholder={placeholders[k as Fields]}
-          onInputChange={onInputChange}
-          onChange={onChange}
-          // onReset={inputsState.reset}
-        />
-      ))}
+      {Object.entries(inputs).map(([k, v]) =>
+        ["tnved1", "tnved2", "id", "reglament", "group"].includes(k) ? (
+          <Autocomplete
+            key={k}
+            options={options[k as Fields]}
+            className={css.input}
+            name={k}
+            value={v as string}
+            placeholder={placeholders[k as Fields]}
+            onInputChange={onInputChange}
+            onChange={onChange}
+            // onReset={inputsState.reset}
+          />
+        ) : (
+          <Input
+            className={k === "name" ? cn(css.input, css.primary) : css.input}
+            key={k}
+            name={k}
+            value={v}
+            placeholder={placeholders[k as Fields]}
+            onChange={(e) =>
+              onInputChange(e.currentTarget.name, e.currentTarget.value)
+            }
+          />
+        )
+      )}
       <Button type="primary" className={css.submit} onClick={handleSubmit}>
         Отправить
       </Button>
