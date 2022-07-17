@@ -1,16 +1,19 @@
 import { GlobalOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Space, Table } from "antd";
+import { Button, Space, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { observer } from "mobx-react-lite";
 import { useContext } from "react";
 import { DataType, SearchContext } from "state/SearchState";
+import { ViewContext } from "state/ViewState";
 import css from "./Table.module.scss";
 
 const MyTable = observer(() => {
   const { data } = useContext(SearchContext);
+  const viewContext = useContext(ViewContext);
 
   const handleShowOnMap = (data: string) => {
     console.log("handleShowOnMap", data);
+    viewContext.changeContentTab("map");
   };
 
   const columns: ColumnsType<DataType> = [

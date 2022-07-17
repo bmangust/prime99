@@ -20,13 +20,9 @@ services:
   #   build:
   #     context: ./front
   #     dockerfile: Dockerfile
-  # back:
+  # ml:
   #   build:
-  #     context: ./back
-  #     dockerfile: Dockerfile
-  # search:
-  #   build:
-  #     context: ./search
+  #     context: ./ml
   #     dockerfile: Dockerfile
 networks:
   prime:
