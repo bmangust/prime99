@@ -1,0 +1,9 @@
+@import "styles/_variables";
+
+.input::placeholder {
+  color: $placeholder;
+}
+
+.optionsLoaded {
+  border-color: rgb(79, 148, 97);
+}
